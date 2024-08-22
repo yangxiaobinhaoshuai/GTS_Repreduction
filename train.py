@@ -9,7 +9,8 @@ from lib.utils import load_graph_data
 
 def main(args):
     with open(args.config_filename) as f:
-        supervisor_config = yaml.load(f)
+        supervisor_config = yaml.load(f, Loader=yaml.FullLoader)
+        print("args.seq_len: ",supervisor_config['model']['seq_len'], " args.output_dim: ",supervisor_config['model']['output_dim'])
         save_adj_name = args.config_filename[11:-5]
         supervisor = GTSSupervisor(save_adj_name, temperature=args.temperature, **supervisor_config)
         supervisor.train()

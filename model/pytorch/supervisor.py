@@ -40,6 +40,10 @@ class GTSSupervisor:
             df = pd.read_hdf('./data/metr-la.h5')
         elif self._data_kwargs['dataset_dir'] == 'data/PEMS-BAY':
             df = pd.read_hdf('./data/pems-bay.h5')
+        else:
+            npz_file = np.load('./data/pems/03/PEMS03.npz')
+            twod_flow_data = npz_file['data'][:, :, 0]
+            df = pd.DataFrame(twod_flow_data)
         #else:
         #    df = pd.read_csv('./data/pmu_normalized.csv', header=None)
         #    df = df.transpose()

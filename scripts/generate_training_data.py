@@ -54,7 +54,15 @@ def generate_graph_seq2seq_io_data(
 
 
 def generate_train_val_test(args):
-    df = pd.read_hdf(args.traffic_df_filename)
+    npz_file = np.load(args.traffic_df_filename)
+
+
+    twod_flow_data = npz_file['data'][:, :, 0]
+    df = pd.DataFrame(twod_flow_data)
+
+
+    # df = pd.read_hdf(args.traffic_df_filename)
+
     # 0 is the latest observed sample.
     x_offsets = np.sort(
         # np.concatenate(([-week_size + 1, -day_size + 1], np.arange(-11, 1, 1)))
@@ -68,7 +76,7 @@ def generate_train_val_test(args):
         df,
         x_offsets=x_offsets,
         y_offsets=y_offsets,
-        add_time_in_day=True,
+        add_time_in_day=False,
         add_day_in_week=False,
     )
 
@@ -120,4 +128,5 @@ if __name__ == "__main__":
         help="Raw traffic readings.",
     )
     args = parser.parse_args()
+    print("generate data args : ",args)
     main(args)
