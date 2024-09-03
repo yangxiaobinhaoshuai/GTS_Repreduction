@@ -41,6 +41,19 @@ python -m scripts.generate_training_data --output_dir=data/METR-LA --traffic_df_
 python -m scripts.generate_training_data --output_dir=data/PEMS-BAY --traffic_df_filename=data/pems-bay.h5
 
 python -m scripts.generate_training_data --output_dir=data/pems/03 --traffic_df_filename=data/pems/03/PEMS03.npz
+python -m scripts.generate_training_data --output_dir=data/pems/04 --traffic_df_filename=data/pems/04/PEMS04.npz --step=12
+python -m scripts.generate_training_data --output_dir=data/pems/04 --traffic_df_filename=data/pems/04/PEMS04.npz --step=24
+python -m scripts.generate_training_data --output_dir=data/pems/04 --traffic_df_filename=data/pems/04/PEMS04.npz --step=36
+python -m scripts.generate_training_data --output_dir=data/pems/04 --traffic_df_filename=data/pems/04/PEMS04.npz --step=48
+
+python -m scripts.generate_training_data --output_dir=data/pems/08 --traffic_df_filename=data/pems/08/PEMS08.npz --step=12
+python -m scripts.generate_training_data --output_dir=data/pems/08 --traffic_df_filename=data/pems/08/PEMS08.npz --step=36
+python -m scripts.generate_training_data --output_dir=data/pems/08 --traffic_df_filename=data/pems/08/PEMS08.npz --step=48
+
+python -m scripts.generate_training_data --output_dir=data/pems/07 --traffic_df_filename=data/pems/07/PEMS07.npz --step=12
+python -m scripts.generate_training_data --output_dir=data/pems/07 --traffic_df_filename=data/pems/07/PEMS07.npz --step=24
+python -m scripts.generate_training_data --output_dir=data/pems/07 --traffic_df_filename=data/pems/07/PEMS07.npz --step=36
+python -m scripts.generate_training_data --output_dir=data/pems/07 --traffic_df_filename=data/pems/07/PEMS07.npz --step=48
 ```
 
 ## Train Model
@@ -55,6 +68,13 @@ python train.py --config_filename=data/model/para_la.yaml --temperature=0.5
 python train.py --config_filename=data/model/para_bay.yaml --temperature=0.5
 
 python train.py --config_filename=data/model/para_pems_03.yaml --temperature=0.5
+
+python train.py --config_filename=data/model/para_pems_04.yaml --temperature=0.5
+
+python train.py --config_filename=data/model/para_pems_08.yaml --temperature=0.5
+
+python train.py --config_filename=data/model/para_pems_07.yaml --temperature=0.5
+python -m pdb train.py --config_filename=data/model/para_pems_07.yaml --temperature=0.5
 ```
 
 Hyperparameters can be modified in the `para_la.yaml` and `para_bay.yaml` files.

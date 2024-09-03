@@ -54,8 +54,10 @@ def generate_graph_seq2seq_io_data(
 
 
 def generate_train_val_test(args):
+    print("Generating training and validation data:",args.traffic_df_filename)
     npz_file = np.load(args.traffic_df_filename)
 
+    step = args.step
 
     twod_flow_data = npz_file['data'][:, :, 0]
     df = pd.DataFrame(twod_flow_data)
@@ -63,13 +65,22 @@ def generate_train_val_test(args):
 
     # df = pd.read_hdf(args.traffic_df_filename)
 
-    # 0 is the latest observed sample.
+    # # 0 is the latest observed sample.
+    # x_offsets = np.sort(
+    #     # np.concatenate(([-week_size + 1, -day_size + 1], np.arange(-11, 1, 1)))
+    #     np.concatenate((np.arange(-11, 1, 1),))
+    # )
+    # # Predict the next one hour
+    # y_offsets = np.sort(np.arange(1, 13, 1))
+
     x_offsets = np.sort(
         # np.concatenate(([-week_size + 1, -day_size + 1], np.arange(-11, 1, 1)))
-        np.concatenate((np.arange(-11, 1, 1),))
+        np.concatenate((np.arange(-(step-1), 1, 1),))
     )
     # Predict the next one hour
-    y_offsets = np.sort(np.arange(1, 13, 1))
+    y_offsets = np.sort(np.arange(1, (step+1), 1))
+
+
     # x: (num_samples, input_length, num_nodes, input_dim)
     # y: (num_samples, output_length, num_nodes, output_dim)
     x, y = generate_graph_seq2seq_io_data(
@@ -113,6 +124,7 @@ def generate_train_val_test(args):
 
 def main(args):
     print("Generating training data")
+    print("args.step: ", args.step)
     generate_train_val_test(args)
 
 
@@ -127,6 +139,7 @@ if __name__ == "__main__":
         default="data/metr-la.h5",
         help="Raw traffic readings.",
     )
+    parser.add_argument("--step", type=int, default=12, help='step size')
     args = parser.parse_args()
     print("generate data args : ",args)
     main(args)

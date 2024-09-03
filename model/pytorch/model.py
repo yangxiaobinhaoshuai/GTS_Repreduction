@@ -1,3 +1,8 @@
+import os
+
+from pandas.core.resample import PeriodIndexResampler
+
+os.environ['CUDA_VISIBLE_DEVICES'] = "2"
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
@@ -61,6 +66,7 @@ class EncoderModel(nn.Module, Seq2SeqAttrs):
     def __init__(self, **model_kwargs):
         nn.Module.__init__(self)
         Seq2SeqAttrs.__init__(self, **model_kwargs)
+        print("EncoderModel args:",model_kwargs)
         self.input_dim = int(model_kwargs.get('input_dim', 1))
         self.seq_len = int(model_kwargs.get('seq_len'))  # for the encoder
         self.dcgru_layers = nn.ModuleList(
@@ -84,6 +90,7 @@ class EncoderModel(nn.Module, Seq2SeqAttrs):
         hidden_states = []
         output = inputs
         for layer_num, dcgru_layer in enumerate(self.dcgru_layers):
+            # print("enumerate dcgru_layers output:",output.shape)
             next_hidden_state = dcgru_layer(output, hidden_state[layer_num], adj)
             hidden_states.append(next_hidden_state)
             output = next_hidden_state
@@ -120,7 +127,12 @@ class DecoderModel(nn.Module, Seq2SeqAttrs):
             output = next_hidden_state
 
         projected = self.projection_layer(output.view(-1, self.rnn_units))
+        # torch.Size([32, 45824])
+        # print("before view forward output: ", output.shape)
+        #  358 * 12
         output = projected.view(-1, self.num_nodes * self.output_dim)
+
+        # print("after view forward output: ", output.shape)
 
         return output, torch.stack(hidden_states)
 
@@ -172,7 +184,8 @@ class GTSModel(nn.Module, Seq2SeqAttrs):
         :return: encoder_hidden_state: (num_layers, batch_size, self.hidden_state_size)
         """
         encoder_hidden_state = None
-        for t in range(self.encoder_model.seq_len):
+        # print("self.encoder_model.seq_len",self.encoder_model.seq_len)
+        for t in range(int(self.encoder_model.seq_len / torch.cuda.device_count())):
             _, encoder_hidden_state = self.encoder_model(inputs[t], adj, encoder_hidden_state)
 
         return encoder_hidden_state
@@ -193,7 +206,7 @@ class GTSModel(nn.Module, Seq2SeqAttrs):
 
         outputs = []
 
-        for t in range(self.decoder_model.horizon):
+        for t in range(int(self.decoder_model.horizon/torch.cuda.device_count())):
             decoder_output, decoder_hidden_state = self.decoder_model(decoder_input, adj,
                                                                       decoder_hidden_state)
             decoder_input = decoder_output

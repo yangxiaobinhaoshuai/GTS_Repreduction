@@ -11,18 +11,20 @@ data:
 model:
   cl_decay_steps: 2000
   filter_type: dual_random_walk
-  horizon: 12
+  horizon: 48
+#  horizon: 12
 #  input_dim: 2
   input_dim: 1
   l1_decay: 0
-  max_diffusion_step: 2
+#  max_diffusion_step: 2
+  max_diffusion_step: 1
 #  num_nodes: 325
   num_nodes: 358
   num_rnn_layers: 1
   output_dim: 1
-#  output_dim: 12
   rnn_units: 128
-  seq_len: 12
+  seq_len: 48
+#  seq_len: 12
   use_curriculum_learning: true
   dim_fc: 293248
 
@@ -30,7 +32,8 @@ train:
   base_lr: 0.001
   dropout: 0
   epoch: 0
-  epochs: 100
+#  epochs: 100
+  epochs: 50
   epsilon: 1.0e-3
   global_step: 0
   lr_decay_ratio: 0.1

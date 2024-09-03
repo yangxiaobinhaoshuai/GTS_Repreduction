@@ -1,3 +1,5 @@
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = "2"
 import torch
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np
@@ -41,7 +43,11 @@ class GTSSupervisor:
         elif self._data_kwargs['dataset_dir'] == 'data/PEMS-BAY':
             df = pd.read_hdf('./data/pems-bay.h5')
         else:
-            npz_file = np.load('./data/pems/03/PEMS03.npz')
+            # npz_file = np.load('./data/pems/03/PEMS03.npz')
+            # npz_file = np.load('./data/pems/04/PEMS04.npz')
+            # npz_file = np.load('./data/pems/08/PEMS08.npz')
+            npz_file = np.load('./data/pems/07/PEMS07.npz')
+            print("dataset_dir", self._data_kwargs['dataset_dir'])
             twod_flow_data = npz_file['data'][:, :, 0]
             df = pd.DataFrame(twod_flow_data)
         #else:
@@ -71,6 +77,7 @@ class GTSSupervisor:
 
         # setup model
         GTS_model = GTSModel(self.temperature, self._logger, **self._model_kwargs)
+        # GTS_model = torch.nn.DataParallel(GTS_model, device_ids=[0,1,2])
         self.GTS_model = GTS_model.cuda() if torch.cuda.is_available() else GTS_model
         self._logger.info("Model created")
 
@@ -288,11 +295,14 @@ class GTSSupervisor:
                 label = 'without_regularization'
 
             for batch_idx, (x, y) in enumerate(train_iterator):
+                # print("batch_idx:{},x:{},y:{}".format(batch_idx, x.shape, y.shape))
                 optimizer.zero_grad()
                 x, y = self._prepare_data(x, y)
+                # print("enumerate train_iterator y: ", y.shape)
                 output, mid_output = self.GTS_model(label, x, self._train_feas, temp, gumbel_soft, y, batches_seen)
                 if (epoch_num % epochs) == epochs - 1:
                     output, mid_output = self.GTS_model(label, x, self._train_feas, temp, gumbel_soft, y, batches_seen)
+                    # print("gts model train output: ", output.shape)
 
                 if batches_seen == 0:
                     if self.opt == 'adam':
@@ -419,10 +429,16 @@ class GTSSupervisor:
         :return: x: shape (seq_len, batch_size, num_sensor * input_dim)
                  y: shape (horizon, batch_size, num_sensor * output_dim)
         """
+        # print("_get_x_y_in_correct_dims,x & y:", x.shape, y.shape)
         batch_size = x.size(1)
-        x = x.view(self.seq_len, batch_size, self.num_nodes * self.input_dim)
-        y = y[..., :self.output_dim].view(self.horizon, batch_size,
+        x = x.reshape(self.seq_len, -1,
+                   # -1)
+                   self.num_nodes * self.input_dim)
+        # print("before view y:", y.shape)
+        y = y[..., :self.output_dim].reshape(self.horizon, -1,
+                                          # -1)
                                           self.num_nodes * self.output_dim)
+        # print("_get_x_y_in_correct_dims x , y,", x.shape, y.shape)
         return x, y
 
     def _compute_loss(self, y_true, y_predicted):

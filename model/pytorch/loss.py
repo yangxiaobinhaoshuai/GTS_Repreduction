@@ -4,6 +4,8 @@ import numpy as np
 def masked_mae_loss(y_pred, y_true):
     mask = (y_true != 0).float()
     mask /= mask.mean()
+    # y_true torch.Size([12, 32, 358])
+    # y_pred torch.Size([12, 32, 4296])
     loss = torch.abs(y_pred - y_true)
     loss = loss * mask
     # trick for nans: https://discuss.pytorch.org/t/how-to-set-nan-in-tensor-to-0/3918/3

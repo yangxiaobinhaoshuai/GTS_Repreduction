@@ -1,2 +1,4 @@
- .idea
+ .idea/
  data/__MACOSX/
+ .DS_Store
+ data/.DS_Store
